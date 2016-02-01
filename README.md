@@ -11,3 +11,13 @@ Usually i use the Arduino as an intermediate element when i work with complex sy
 **The library can**
  - sending and receiving of commands with arguments
  - attaching callback functions any received command
+ 
+
+## **The message format**
+
+
+The message format is a simple way for send and receive of commands. Each of the message is consist of the following items:
+
+## `Command ID` | `param1` | ..... | `param N`
+
+The Message format supports any primary data types, and zero to many multiple arguments.
