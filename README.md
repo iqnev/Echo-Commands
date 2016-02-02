@@ -26,7 +26,7 @@ The Message format supports any primary data types, and zero to many multiple ar
 
 This example shows how to use Echo-Commands as a Arduino library and communicate with it using the any kind of communication interface.
 
-Available commands
+## **Available commands**
 
 **The PC site**
 ```
