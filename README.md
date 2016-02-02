@@ -28,33 +28,3 @@ This example shows how to use Echo-Commands as a Arduino library and communicate
 
 Available commands
 
-  >               The PC site
->    1 | <led state>      - Sets led. 0 = off, 1 = on
-
->    2 | <<led brightness> - Sets led brighness. 0 - 3200
-
->    3 |                  - Shows led state
-
->                The Arduino board
-> Command #3
-
->    Led status: off
-
->    Led brightness: 0
-
-> Command #1 | 1
->    Led status: on
->    Led brightness: 3200
-
-> Command #3
->   Led status: on
->   Led brightness: 3200
-
-> Command #2 | 200
->   Led status: on
->   Led brightness: 200
-
-> Command #3
->   Led status: on
->   Led brightness: 200
-
