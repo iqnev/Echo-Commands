@@ -24,7 +24,7 @@
 
 #include <inttypes.h>
 
-#include <Arduino.h>
+#include Arduino_h
 
 // Time out on unanswered messages.
 #define DEFAULT_TIMEOUT = 3000;
@@ -38,14 +38,12 @@
 // The length of the streambuffer.
 #define STREAM_BUFFER_SIZE = 512;
 
-
-
-
 class EchoCommander {
+  int number;
+
  public:
 
-  bool startCommand;
-  bool ArgSuccessful;
+  bool startCommand;bool ArgSuccessful;
 
   // Buffer that holds the command data,
   char commandBuffer[MAX_CALLBACKS];
@@ -53,12 +51,21 @@ class EchoCommander {
   // Buffer that holds the stream data.
   char streamBuffer[STREAM_BUFFER_SIZE];
 
+  //TODO: delete
   uint8_t bufferSize;
+
+  //The current index where to write data in buffer.
   uint8_t bufferIndex;
+
+  //The last index of the buffer.
   uint8_t bufferLastIndex;
+
+  //The ID of the last received command.
   uint8_t lastCommandID;
 
   Stream *common;
+
+  commandCallbackFunction commandList[MAX_CALLBACKS];
 
   //==================================================================
   //
@@ -66,7 +73,21 @@ class EchoCommander {
   //
   //==================================================================
 
+  /**
+   * The deafault constructor with parameters.
+   * @param common The current stream from Arduino Stream utility class.
+   */
+  EchoCommander(Stream & comms);
+
+  /**
+   * The method that initialize the EchoCommander class.
+   * @param common The current stream from Arduino Stream utility class.
+   */
   void setup(Stream & common);
+
+  /**
+   * The reset() method resets the command buffer and message state.
+   */
   void reset();
 
   EchoCommander();

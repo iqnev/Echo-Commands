@@ -19,10 +19,36 @@
 // Since       : 2016
 // Description : TODO
 //============================================================================
+extern "C" {
+#include <stdlib.h>
+#include <stdarg.h>
+}
+#include <stdio.h>
 #include "EchoCommander.h"
 
-EchoCommander::EchoCommander() {
-  // TODO Auto-generated constructor stub
+EchoCommander::EchoCommander(Stream &common) {
+  setup(common);
+}
+
+
+void EchoCommander::setup(Stream &common) {
+  common = &common;
+  bufferSize = BUFFER_MESSAGE_SIZE;
+  bufferLastIndex = BUFFER_MESSAGE_SIZE - 1;
+
+  reset();
+  int i =0;
+  for(i = 0; i< MAX_CALLBACKS; i++ ) {
+    commandList[i] = NULL;
+  }
+
+
+
+
+}
+
+void EchoCommander::reset() {
+  bufferIndex = 0;
 
 }
 
