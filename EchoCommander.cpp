@@ -42,14 +42,42 @@ void EchoCommander::setup(Stream &common) {
     commandList[i] = NULL;
   }
 
-
-
-
+  locking_sender = false;
 }
 
 void EchoCommander::reset() {
   bufferIndex = 0;
 
+}
+
+void EchoCommander::addNewLineCom(bool newLine) {
+  pr_newlines = newLine;
+}
+
+void EchoCommander::readSerialData() {
+    while(!locking_sender && common->available()) {
+      size_t bytesAvailable;
+      bytesAvailable = STREAM_BUFFER_SIZE
+
+      if(common->available() < bytesAvailable) {
+        bytesAvailable = common->available();
+      }
+
+      common->readBytes(streamBuffer, bytesAvailable);
+
+      for(size_t i = 0; i < bytesAvailable; i ++ ) {
+        int state = extractMessage(streamBuffer[i]);
+
+        if(state == endOfMessage) {
+          dispatcheMessage();
+        }
+      }
+    }
+}
+
+uint8_t EchoCommander::extractMessage(char currentChar) {
+  mState = extractfOfMessage;
+  //TODO
 }
 
 EchoCommander::~EchoCommander() {

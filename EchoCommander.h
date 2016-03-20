@@ -38,6 +38,14 @@
 // The length of the streambuffer.
 #define STREAM_BUFFER_SIZE = 512;
 
+// Message States
+enum
+{
+  endOfMessage,
+  extractfOfMessage,
+  extractOfArguments,
+};
+
 class EchoCommander {
   int number;
 
@@ -51,8 +59,17 @@ class EchoCommander {
   // Buffer that holds the stream data.
   char streamBuffer[STREAM_BUFFER_SIZE];
 
+  // If \r\n should be added after send command.
+  bool pr_newlines;
+
+  // Locks the input streaming of new commands, during sending a command.
+  bool locking_sender;
+
   //TODO: delete
   uint8_t bufferSize;
+
+  //The state of a message.
+  uint8_t mState;
 
   //The current index where to write data in buffer.
   uint8_t bufferIndex;
@@ -89,6 +106,27 @@ class EchoCommander {
    * The reset() method resets the command buffer and message state.
    */
   void reset();
+
+  /**
+   * Addes a new line after a sent command.
+   */
+  void addNewLineCom(bool newLLine = true);
+
+  //==================================================================
+  //
+  //    Processing
+  //
+  //==================================================================
+
+  /**
+   * Reads Serial data in EchoCommander from Arduino Searial interface.
+   */
+  void readSerialData();
+
+  /**
+   * Command extracting from a current message.
+   */
+  inline  uint8_t extractMessage(char currentChar) __attribute__((always_inline));
 
   EchoCommander();
   virtual ~EchoCommander();
