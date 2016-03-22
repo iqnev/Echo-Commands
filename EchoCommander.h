@@ -59,6 +59,18 @@ class EchoCommander {
   // Buffer that holds the stream data.
   char streamBuffer[STREAM_BUFFER_SIZE];
 
+  // Command escape character.
+  char cmdEscapeChar;
+
+  // The last char of a command.
+  char commandLastChar;
+
+  // The sepator of a command.
+  char cmdSeparator;
+
+  // A pointer to current position of a buffer.
+  char *present;
+
   // If \r\n should be added after send command.
   bool pr_newlines;
 
@@ -93,8 +105,10 @@ class EchoCommander {
   /**
    * The deafault constructor with parameters.
    * @param common The current stream from Arduino Stream utility class.
+   * @param cmd_esc_char The character, which must be escaped from a command.
+   * @param cmd_separator The separator of all commands.
    */
-  EchoCommander(Stream & comms);
+  EchoCommander(Stream & comms, const char cmd_esc_char = '/', const char cmd_separator = ';');
 
   /**
    * The method that initialize the EchoCommander class.
@@ -127,6 +141,11 @@ class EchoCommander {
    * Command extracting from a current message.
    */
   inline  uint8_t extractMessage(char currentChar) __attribute__((always_inline));
+
+  /**
+   * Checks whether a current string is clean.
+   */
+  bool isClean(char *currentChar, const char clearChar, char *lastChar);
 
   EchoCommander();
   virtual ~EchoCommander();

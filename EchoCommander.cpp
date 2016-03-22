@@ -26,15 +26,17 @@ extern "C" {
 #include <stdio.h>
 #include "EchoCommander.h"
 
-EchoCommander::EchoCommander(Stream &common) {
-  setup(common);
+EchoCommander::EchoCommander(Stream &common, const char cmd_esc_char, const char cmd_separator, const char cmd_separator)) {
+  setup(common, cmd_esc_char, cmd_separator);
 }
 
 
-void EchoCommander::setup(Stream &common) {
+void EchoCommander::setup(Stream &common, const char cmd_esc_char, const char cmd_separator) {
   common = &common;
   bufferSize = BUFFER_MESSAGE_SIZE;
   bufferLastIndex = BUFFER_MESSAGE_SIZE - 1;
+  cmdEscapeChar = cmd_esc_char;
+  cmdSeparator = cmd_separator;
 
   reset();
   int i =0;
@@ -47,6 +49,7 @@ void EchoCommander::setup(Stream &common) {
 
 void EchoCommander::reset() {
   bufferIndex = 0;
+  present = null;
 
 }
 
@@ -77,7 +80,43 @@ void EchoCommander::readSerialData() {
 
 uint8_t EchoCommander::extractMessage(char currentChar) {
   mState = extractfOfMessage;
-  //TODO
+
+  bool clean = isClean(&currentChar, cmdEscapeChar, &commandLastChar);
+  if(!clean && (currentChar == cmdSeparator)) {
+    commandBuffer[bufferIndex] = 0;
+
+    if(bufferIndex > 0) {
+      present = commandBuffer;
+      commandLastChar = '\0';
+      mState = endOfMessage;
+    }
+
+    reset();
+  } else {
+    commandBuffer[bufferIndex] = currentChar;
+    bufferIndex++;
+    if(bufferIndex >= bufferLastIndex) {
+      reset();
+    }
+  }
+
+  return mState;
+}
+
+bool EchoCommander::isClean(char *currentChar, const char escapeChar, char *commandLastChar) {
+  bool clean = false;
+
+  if(escapeChar == *commandLastChar) {
+    clean = true;
+  }
+
+  *commandLastChar = *currentChar;
+
+  if(*commandLastChar == escapeChar && cmdEscapeChar) {
+    *commandLastChar = '\0';
+  }
+
+  return clean;
 }
 
 EchoCommander::~EchoCommander() {
