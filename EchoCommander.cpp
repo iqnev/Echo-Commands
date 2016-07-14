@@ -26,7 +26,7 @@ extern "C" {
 #include <stdio.h>
 #include "EchoCommander.h"
 
-EchoCommander::EchoCommander(Stream &common, const char cmd_esc_char, const char cmd_separator, const char cmd_separator)) {
+EchoCommander::EchoCommander(Stream &common, const char cmd_esc_char, const char cmd_separator, const char cmd_separator) {
   setup(common, cmd_esc_char, cmd_separator);
 }
 
@@ -76,6 +76,20 @@ void EchoCommander::readSerialData() {
         }
       }
     }
+}
+
+void EchoCommander::dispatcheMessage() {
+  lastCommandID = getNextCommand(); //TODO
+
+  if(lastCommandID >0 0 && lastCommandID < MAX_CALLBACKS && commandList[lastCommandID] != NULL) {
+    //TODO
+  }
+  /**
+   * if (lastCommandId >= 0 && lastCommandId < MAXCALLBACKS && ArgOk && callbackList[lastCommandId] != NULL)
+    (*callbackList[lastCommandId])();
+  else // If command not attached, call default callback (if attached)
+    if (default_callback != NULL) (*default_callback)();
+   */
 }
 
 uint8_t EchoCommander::extractMessage(char currentChar) {

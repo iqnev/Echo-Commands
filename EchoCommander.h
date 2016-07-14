@@ -24,23 +24,34 @@
 
 #include <inttypes.h>
 
-#include Arduino_h
+#if ARDUINO >= 100
+#include "Arduino.h"
+#else
+ //TODO
+#endif
+#include "Stream.h"
+
+extern "C"
+{
+  // callback functions always follow the signature
+  typedef void(*commandCallbackFunction) (void);
+}
+
 
 // Time out on unanswered messages.
-#define DEFAULT_TIMEOUT = 3000;
+#define DEFAULT_TIMEOUT 3000
 
 // The maximum number of possible commands.
-#define MAX_CALLBACKS = 30;
+#define MAX_CALLBACKS 30
 
 // The length of the commandbuffer.
-#define BUFFER_MESSAGE_SIZE = 64;
+#define BUFFER_MESSAGE_SIZE 64
 
 // The length of the streambuffer.
-#define STREAM_BUFFER_SIZE = 512;
+#define STREAM_BUFFER_SIZE 512
 
 // Message States
-enum
-{
+enum {
   endOfMessage,
   extractfOfMessage,
   extractOfArguments,
@@ -51,7 +62,8 @@ class EchoCommander {
 
  public:
 
-  bool startCommand;bool ArgSuccessful;
+  bool startCommand;
+  bool ArgSuccessful;
 
   // Buffer that holds the command data,
   char commandBuffer[MAX_CALLBACKS];
@@ -108,13 +120,14 @@ class EchoCommander {
    * @param cmd_esc_char The character, which must be escaped from a command.
    * @param cmd_separator The separator of all commands.
    */
-  EchoCommander(Stream & comms, const char cmd_esc_char = '/', const char cmd_separator = ';');
+  EchoCommander(Stream & comms, const char cmd_esc_char = '/',
+                const char cmd_separator = ';', const char cmd_separator = ',');
 
   /**
    * The method that initialize the EchoCommander class.
    * @param common The current stream from Arduino Stream utility class.
    */
-  void setup(Stream & common);
+  void setup(Stream & common, const char cmd_esc_char, const char cmd_separator);
 
   /**
    * The reset() method resets the command buffer and message state.
@@ -140,8 +153,10 @@ class EchoCommander {
   /**
    * Command extracting from a current message.
    */
-  inline  uint8_t extractMessage(char currentChar) __attribute__((always_inline));
+  inline uint8_t extractMessage(char currentChar)
+      __attribute__((always_inline));
 
+  inline void dispatcheMessage() __attribute__((always_inline));
   /**
    * Checks whether a current string is clean.
    */
