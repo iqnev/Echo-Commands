@@ -65,6 +65,8 @@ class EchoCommander {
   bool startCommand;
   bool ArgSuccessful;
 
+  bool stopProcessing;
+
   // Buffer that holds the command data,
   char commandBuffer[MAX_CALLBACKS];
 
@@ -76,6 +78,8 @@ class EchoCommander {
 
   // The last char of a command.
   char commandLastChar;
+
+  char cmdFieldChar;
 
   // The sepator of a command.
   char cmdSeparator;
@@ -121,13 +125,13 @@ class EchoCommander {
    * @param cmd_separator The separator of all commands.
    */
   EchoCommander(Stream & comms, const char cmd_esc_char = '/',
-                const char cmd_separator = ';', const char cmd_separator = ',');
+                const char cmd_separator = ';', const char cmd_line_separator = ',');
 
   /**
    * The method that initialize the EchoCommander class.
    * @param common The current stream from Arduino Stream utility class.
    */
-  void setup(Stream & common, const char cmd_esc_char, const char cmd_separator);
+  void setup(Stream & common, const char cmd_esc_char, const char cmd_separator, const char cmd_field_separator);
 
   /**
    * The reset() method resets the command buffer and message state.
@@ -145,6 +149,7 @@ class EchoCommander {
   //
   //==================================================================
 
+  bool sendMessCommand(byte commandId);
   /**
    * Reads Serial data in EchoCommander from Arduino Searial interface.
    */

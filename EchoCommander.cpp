@@ -26,17 +26,18 @@ extern "C" {
 #include <stdio.h>
 #include "EchoCommander.h"
 
-EchoCommander::EchoCommander(Stream &common, const char cmd_esc_char, const char cmd_separator, const char cmd_separator) {
-  setup(common, cmd_esc_char, cmd_separator);
+EchoCommander::EchoCommander(Stream &common, const char cmd_esc_char, const char cmd_separator, const char cmd_line_separator) {
+  setup(common, cmd_esc_char, cmd_separator, cmd_line_separator);
 }
 
 
-void EchoCommander::setup(Stream &common, const char cmd_esc_char, const char cmd_separator) {
+void EchoCommander::setup(Stream &common, const char cmd_esc_char, const char cmd_separator, const char cmd_line_separator) {
   common = &common;
   bufferSize = BUFFER_MESSAGE_SIZE;
   bufferLastIndex = BUFFER_MESSAGE_SIZE - 1;
   cmdEscapeChar = cmd_esc_char;
   cmdSeparator = cmd_separator;
+  cmdFieldChar = cmd_line_separator;
 
   reset();
   int i =0;
@@ -50,7 +51,14 @@ void EchoCommander::setup(Stream &common, const char cmd_esc_char, const char cm
 void EchoCommander::reset() {
   bufferIndex = 0;
   present = null;
+}
 
+bool EchoCommander::sendMessCommand(byte commandId) {
+  if(!startCommand) {
+    startCommand = true;
+    stopProcessing = true;
+    common->print(commandId);
+  }
 }
 
 void EchoCommander::addNewLineCom(bool newLine) {
@@ -79,17 +87,7 @@ void EchoCommander::readSerialData() {
 }
 
 void EchoCommander::dispatcheMessage() {
-  lastCommandID = getNextCommand(); //TODO
-
-  if(lastCommandID >0 0 && lastCommandID < MAX_CALLBACKS && commandList[lastCommandID] != NULL) {
-    //TODO
-  }
-  /**
-   * if (lastCommandId >= 0 && lastCommandId < MAXCALLBACKS && ArgOk && callbackList[lastCommandId] != NULL)
-    (*callbackList[lastCommandId])();
-  else // If command not attached, call default callback (if attached)
-    if (default_callback != NULL) (*default_callback)();
-   */
+ //TODO
 }
 
 uint8_t EchoCommander::extractMessage(char currentChar) {
