@@ -26,12 +26,15 @@ extern "C" {
 #include <stdio.h>
 #include "EchoCommander.h"
 
-EchoCommander::EchoCommander(Stream &common, const char cmd_esc_char, const char cmd_separator, const char cmd_line_separator) {
+EchoCommander::EchoCommander(Stream &common, const char cmd_esc_char,
+                             const char cmd_separator,
+                             const char cmd_line_separator) {
   setup(common, cmd_esc_char, cmd_separator, cmd_line_separator);
 }
 
-
-void EchoCommander::setup(Stream &common, const char cmd_esc_char, const char cmd_separator, const char cmd_line_separator) {
+void EchoCommander::setup(Stream &common, const char cmd_esc_char,
+                          const char cmd_separator,
+                          const char cmd_line_separator) {
   common = &common;
   bufferSize = BUFFER_MESSAGE_SIZE;
   bufferLastIndex = BUFFER_MESSAGE_SIZE - 1;
@@ -40,8 +43,8 @@ void EchoCommander::setup(Stream &common, const char cmd_esc_char, const char cm
   cmdFieldChar = cmd_line_separator;
 
   reset();
-  int i =0;
-  for(i = 0; i< MAX_CALLBACKS; i++ ) {
+  int i = 0;
+  for (i = 0; i < MAX_CALLBACKS; i++) {
     commandList[i] = NULL;
   }
 
@@ -50,11 +53,11 @@ void EchoCommander::setup(Stream &common, const char cmd_esc_char, const char cm
 
 void EchoCommander::reset() {
   bufferIndex = 0;
-  present = null;
+  presentPoint = null;
 }
 
 bool EchoCommander::sendMessCommand(byte commandId) {
-  if(!startCommand) {
+  if (!startCommand) {
     startCommand = true;
     stopProcessing = true;
     common->print(commandId);
@@ -66,39 +69,71 @@ void EchoCommander::addNewLineCom(bool newLine) {
 }
 
 void EchoCommander::readSerialData() {
-    while(!locking_sender && common->available()) {
-      size_t bytesAvailable;
-      bytesAvailable = STREAM_BUFFER_SIZE
+  while (!locking_sender && common->available()) {
+    size_t bytesAvailable;
+    bytesAvailable = STREAM_BUFFER_SIZE
 
-      if(common->available() < bytesAvailable) {
-        bytesAvailable = common->available();
-      }
+    if (common->available() < bytesAvailable) {
+      bytesAvailable = common->available();
+    }
 
-      common->readBytes(streamBuffer, bytesAvailable);
+    common->readBytes(streamBuffer, bytesAvailable);
 
-      for(size_t i = 0; i < bytesAvailable; i ++ ) {
-        int state = extractMessage(streamBuffer[i]);
+    for (size_t i = 0; i < bytesAvailable; i++) {
+      int state = extractMessage(streamBuffer[i]);
 
-        if(state == endOfMessage) {
-          dispatcheMessage();
-        }
+      if (state == endOfMessage) {
+        dispatcheMessage();
       }
     }
+  }
 }
 
 void EchoCommander::dispatcheMessage() {
- //TODO
+
+}
+
+int16_t EchoCommander::readNextArg() {
+
+}
+
+bool EchoCommander::nextArg() {
+  char * tempPoint = NULL;
+
+  switch (currentMessageState) {
+    case extractfOfMessage:
+      return false;
+      break;
+    case endOfMessage:
+      tempPoint = commandBuffer;
+      currentMessageState = extractOfArguments;
+      break;
+    default:
+      if (lastArgIsReaded) {
+        presentPoint = tokenize(tempPoint, cmdFieldChar, &lastPoint);
+      }
+
+      if (presentPoint != NULL) {
+        lastArgIsReaded = true;
+        return true;
+      }
+      break;
+  }
+}
+
+char* EchoCommander::tokenize(char *str, const char separator, char **nextPointer) {
+  //TODO split_r
 }
 
 uint8_t EchoCommander::extractMessage(char currentChar) {
   mState = extractfOfMessage;
 
   bool clean = isClean(&currentChar, cmdEscapeChar, &commandLastChar);
-  if(!clean && (currentChar == cmdSeparator)) {
+  if (!clean && (currentChar == cmdSeparator)) {
     commandBuffer[bufferIndex] = 0;
 
-    if(bufferIndex > 0) {
-      present = commandBuffer;
+    if (bufferIndex > 0) {
+      presentPoint = commandBuffer;
       commandLastChar = '\0';
       mState = endOfMessage;
     }
@@ -107,7 +142,7 @@ uint8_t EchoCommander::extractMessage(char currentChar) {
   } else {
     commandBuffer[bufferIndex] = currentChar;
     bufferIndex++;
-    if(bufferIndex >= bufferLastIndex) {
+    if (bufferIndex >= bufferLastIndex) {
       reset();
     }
   }
@@ -115,16 +150,17 @@ uint8_t EchoCommander::extractMessage(char currentChar) {
   return mState;
 }
 
-bool EchoCommander::isClean(char *currentChar, const char escapeChar, char *commandLastChar) {
+bool EchoCommander::isClean(char *currentChar, const char escapeChar,
+                            char *commandLastChar) {
   bool clean = false;
 
-  if(escapeChar == *commandLastChar) {
+  if (escapeChar == *commandLastChar) {
     clean = true;
   }
 
   *commandLastChar = *currentChar;
 
-  if(*commandLastChar == escapeChar && cmdEscapeChar) {
+  if (*commandLastChar == escapeChar && cmdEscapeChar) {
     *commandLastChar = '\0';
   }
 

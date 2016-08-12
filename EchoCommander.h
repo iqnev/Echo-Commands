@@ -79,19 +79,28 @@ class EchoCommander {
   // The last char of a command.
   char commandLastChar;
 
+  //The sepator end of command.
   char cmdFieldChar;
 
   // The sepator of a command.
   char cmdSeparator;
 
+  //The last pointer to previous buffer position.
+  char *lastPoint;
+
   // A pointer to current position of a buffer.
-  char *present;
+  char *presentPoint;
 
   // If \r\n should be added after send command.
   bool pr_newlines;
 
   // Locks the input streaming of new commands, during sending a command.
   bool locking_sender;
+
+  //The last argument is readed.
+  bool lastArgIsReaded;
+
+  uint8_t currentMessageState;
 
   //TODO: delete
   uint8_t bufferSize;
@@ -155,17 +164,35 @@ class EchoCommander {
    */
   void readSerialData();
 
+  /*
+   * Reads the next argument.
+   */
+  int16_t readNextArg();
+
+  /*
+   * Gets the next argument. If argument is available- return true.
+   */
+  bool nextArg();
+
   /**
    * Command extracting from a current message.
    */
   inline uint8_t extractMessage(char currentChar)
       __attribute__((always_inline));
 
+  /*
+   * Dispatches attached callbacks.
+   */
   inline void dispatcheMessage() __attribute__((always_inline));
   /**
    * Checks whether a current string is clean.
    */
   bool isClean(char *currentChar, const char clearChar, char *lastChar);
+
+  /*
+   * Split string in different tokens.
+   */
+  char *tokenize(char *str, const char separator, char **nextPointer);
 
   EchoCommander();
   virtual ~EchoCommander();
