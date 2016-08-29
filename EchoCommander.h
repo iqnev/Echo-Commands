@@ -194,6 +194,26 @@ class EchoCommander {
    */
   char *tokenize(char *str, const char separator, char **nextPointer);
 
+
+  //####################################################################################
+  //        Util methods
+  //####################################################################################################################
+
+  /**
+   * Split frame in different token by a delimiter.
+   */
+  char *split_frame(char *str, const char dlm, char **nextPoint);
+
+  /**
+   * Find next argument in frame.
+   */
+  int findNext(char *str, char delim);
+
+  /**
+   *Checks if the current character is escaped.
+   */
+  bool isEscaped(char *currentChar, const char escapeChar, char *lastChar);
+
   EchoCommander();
   virtual ~EchoCommander();
 };

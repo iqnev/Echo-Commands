@@ -125,6 +125,47 @@ char* EchoCommander::tokenize(char *str, const char separator, char **nextPointe
   //TODO split_r
 }
 
+char* EchoCommander::split_frame(char *str, const char dlm, char **nextPoint) {
+
+  if(str == NULL) {
+    str = *nextPoint;
+  }
+
+  while(findNext(str, dlm) == 0 && *str) {
+    str++;
+  }
+
+  //todo
+
+
+}
+
+int EchoCommander::findNext(char *str, char dlm) {
+  int position =0;
+  commandLastChar = '\0';
+  bool escaped = false;
+
+  while(true) {
+    escape = isEscaped(str, cmdEscapeChar, &commandLastChar);
+    if(*str == '\0' && !escaped) {
+      return position;
+    }
+
+    if(*str == cmdFieldChar && !escaped) {
+      return position;
+    } else {
+      str++;
+      position++;
+    }
+
+    return position;
+  }
+}
+
+bool EchoCommander::isEscaped(char *currentChar, char escapeChar, char *lastChar) {
+  //TODO
+}
+
 uint8_t EchoCommander::extractMessage(char currentChar) {
   mState = extractfOfMessage;
 
