@@ -127,6 +127,7 @@ char* EchoCommander::tokenize(char *str, const char separator, char **nextPointe
 
 char* EchoCommander::split_frame(char *str, const char dlm, char **nextPoint) {
 
+  char *back;
   if(str == NULL) {
     str = *nextPoint;
   }
@@ -135,7 +136,22 @@ char* EchoCommander::split_frame(char *str, const char dlm, char **nextPoint) {
     str++;
   }
 
-  //todo
+  if(*str == '\0') {
+    return NULL;
+  }
+
+  back = str;
+
+  str += findNext(str, dlm);
+
+  if(*str) {
+    *str++ ='\0';
+  }
+
+  //Set the next pointer.
+  *nextPoint = str;
+
+  return back;
 
 
 }
