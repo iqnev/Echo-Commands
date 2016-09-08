@@ -119,6 +119,9 @@ class EchoCommander {
 
   Stream *common;
 
+  //default function
+  commandCallbackFunction defaultFunction;
+
   commandCallbackFunction commandList[MAX_CALLBACKS];
 
   //==================================================================
@@ -152,13 +155,33 @@ class EchoCommander {
    */
   void addNewLineCom(bool newLLine = true);
 
+  /**
+   * Apply function for commands that are not explicitly attached.
+   */
+  void apply(commandCallbackFunction commandFunction);
+
+  /**
+   * Apply a function to a command ID.
+   */
+  void apply(byte messageId, commandCallbackFunction commandFunction);
   //==================================================================
   //
   //    Processing
   //
   //==================================================================
 
+  /**
+   * Send a command without arguments and without acknowledge.
+   */
   bool sendMessCommand(byte commandId);
+
+  /**
+   * Send a command with arguments and with acknowledge.
+   */
+  bool sendMessCommand(byte commandId, bool ACK, byte ackCommandId);
+
+  void sendCommandStart(byte commandId);
+
   /**
    * Reads Serial data in EchoCommander from Arduino Searial interface.
    */
@@ -189,11 +212,6 @@ class EchoCommander {
    */
   bool isClean(char *currentChar, const char clearChar, char *lastChar);
 
-  /*
-   * Split string in different tokens.
-   */
-  char *tokenize(char *str, const char separator, char **nextPointer);
-
 
   //####################################################################################
   //        Util methods
@@ -202,7 +220,7 @@ class EchoCommander {
   /**
    * Split frame in different token by a delimiter.
    */
-  char *split_frame(char *str, const char dlm, char **nextPoint);
+  char *tokenize_frame(char *str, const char dlm, char **nextPoint);
 
   /**
    * Find next argument in frame.

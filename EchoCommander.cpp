@@ -35,6 +35,7 @@ EchoCommander::EchoCommander(Stream &common, const char cmd_esc_char,
 void EchoCommander::setup(Stream &common, const char cmd_esc_char,
                           const char cmd_separator,
                           const char cmd_line_separator) {
+  defaultFunction = NULL;
   common = &common;
   bufferSize = BUFFER_MESSAGE_SIZE;
   bufferLastIndex = BUFFER_MESSAGE_SIZE - 1;
@@ -58,6 +59,23 @@ void EchoCommander::reset() {
 
 bool EchoCommander::sendMessCommand(byte commandId) {
   if (!startCommand) {
+    startCommand = true;
+    stopProcessing = true;
+    common->print(commandId);
+  }
+}
+
+bool EchoCommander::sendMessCommand(byte commandId, bool ACK, byte ackCommandId) {
+  if(!startCommand) {
+    sendCommandStart(commandId);
+    //TODO return sendCmdEnd(reqAc, ackCmdId, DEFAULT_TIMEOUT);
+  }
+
+  return false;
+}
+
+void EchoCommander::sendCommandStart(byte commandId) {
+  if(!startCommand) {
     startCommand = true;
     stopProcessing = true;
     common->print(commandId);
@@ -110,7 +128,7 @@ bool EchoCommander::nextArg() {
       break;
     default:
       if (lastArgIsReaded) {
-        presentPoint = tokenize(tempPoint, cmdFieldChar, &lastPoint);
+        presentPoint = tokenize_frame(tempPoint, cmdFieldChar, &lastPoint);
       }
 
       if (presentPoint != NULL) {
@@ -121,11 +139,7 @@ bool EchoCommander::nextArg() {
   }
 }
 
-char* EchoCommander::tokenize(char *str, const char separator, char **nextPointer) {
-  //TODO split_r
-}
-
-char* EchoCommander::split_frame(char *str, const char dlm, char **nextPoint) {
+char* EchoCommander::tokenize_frame(char *str, const char dlm, char **nextPoint) {
 
   char *back;
   if(str == NULL) {
@@ -162,7 +176,7 @@ int EchoCommander::findNext(char *str, char dlm) {
   bool escaped = false;
 
   while(true) {
-    escape = isEscaped(str, cmdEscapeChar, &commandLastChar);
+    escaped = isEscaped(str, cmdEscapeChar, &commandLastChar);
     if(*str == '\0' && !escaped) {
       return position;
     }
@@ -179,7 +193,16 @@ int EchoCommander::findNext(char *str, char dlm) {
 }
 
 bool EchoCommander::isEscaped(char *currentChar, char escapeChar, char *lastChar) {
-  //TODO
+  bool escaped;
+
+  escaped = (*lastChar == escapeChar);
+  *lastChar = *currentChar;
+
+  if(*lastChar == cmdEscapeChar && escaped) {
+    *lastChar = '\0';
+  }
+
+  return escaped;
 }
 
 uint8_t EchoCommander::extractMessage(char currentChar) {
@@ -222,6 +245,16 @@ bool EchoCommander::isClean(char *currentChar, const char escapeChar,
   }
 
   return clean;
+}
+
+void EchoCommander::apply(commandCallbackFunction commandFunction) {
+  defaultFunction = commandFunction;
+}
+
+void EchoCommander::apply(byte messageId, commandCallbackFunction commandFunction) {
+  if(messageId > 0 && messageId< MAX_CALLBACKS) {
+    commandList[messageId] = commandFunction;
+  }
 }
 
 EchoCommander::~EchoCommander() {
