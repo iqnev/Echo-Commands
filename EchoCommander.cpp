@@ -65,8 +65,9 @@ bool EchoCommander::sendMessCommand(byte commandId) {
   }
 }
 
-bool EchoCommander::sendMessCommand(byte commandId, bool ACK, byte ackCommandId) {
-  if(!startCommand) {
+bool EchoCommander::sendMessCommand(byte commandId, bool ACK,
+                                    byte ackCommandId) {
+  if (!startCommand) {
     sendCommandStart(commandId);
     //TODO return sendCmdEnd(reqAc, ackCmdId, DEFAULT_TIMEOUT);
   }
@@ -75,11 +76,45 @@ bool EchoCommander::sendMessCommand(byte commandId, bool ACK, byte ackCommandId)
 }
 
 void EchoCommander::sendCommandStart(byte commandId) {
-  if(!startCommand) {
+  if (!startCommand) {
     startCommand = true;
     stopProcessing = true;
     common->print(commandId);
   }
+}
+
+bool EchoCommander::sendCommandStop(bool ACK, byte ackCommandId,
+                                    unsigned int timeout) {
+  bool ackReply = false;
+
+  if (startCommand) {
+    common->print(cmdSeparator);
+    if (pr_newlines) {
+      common->println();
+    }
+
+    if (ACK) {
+      //TODO ackReply = blockedTillReply(timeout, ackCmdId);
+    }
+  }
+
+  stopProcessing = false;
+  startCommand = false;
+
+  return ackReply;
+}
+
+bool EchoCommander::blockedToReply(unsigned int timeout, byte ackCommandId) {
+  unsigned long time = millis();
+  unsigned long start = start;
+  bool receivedAck = false;
+
+  while((time - start) < timeout && !receivedAck) {
+      time = millis();
+      //TODO receivedAck = checkForAck(ackCmdId);
+  }
+
+  return receivedAck;
 }
 
 void EchoCommander::addNewLineCom(bool newLine) {
@@ -139,18 +174,19 @@ bool EchoCommander::nextArg() {
   }
 }
 
-char* EchoCommander::tokenize_frame(char *str, const char dlm, char **nextPoint) {
+char* EchoCommander::tokenize_frame(char *str, const char dlm,
+                                    char **nextPoint) {
 
   char *back;
-  if(str == NULL) {
+  if (str == NULL) {
     str = *nextPoint;
   }
 
-  while(findNext(str, dlm) == 0 && *str) {
+  while (findNext(str, dlm) == 0 && *str) {
     str++;
   }
 
-  if(*str == '\0') {
+  if (*str == '\0') {
     return NULL;
   }
 
@@ -158,8 +194,8 @@ char* EchoCommander::tokenize_frame(char *str, const char dlm, char **nextPoint)
 
   str += findNext(str, dlm);
 
-  if(*str) {
-    *str++ ='\0';
+  if (*str) {
+    *str++ = '\0';
   }
 
   //Set the next pointer.
@@ -167,21 +203,20 @@ char* EchoCommander::tokenize_frame(char *str, const char dlm, char **nextPoint)
 
   return back;
 
-
 }
 
 int EchoCommander::findNext(char *str, char dlm) {
-  int position =0;
+  int position = 0;
   commandLastChar = '\0';
   bool escaped = false;
 
-  while(true) {
+  while (true) {
     escaped = isEscaped(str, cmdEscapeChar, &commandLastChar);
-    if(*str == '\0' && !escaped) {
+    if (*str == '\0' && !escaped) {
       return position;
     }
 
-    if(*str == cmdFieldChar && !escaped) {
+    if (*str == cmdFieldChar && !escaped) {
       return position;
     } else {
       str++;
@@ -192,13 +227,14 @@ int EchoCommander::findNext(char *str, char dlm) {
   }
 }
 
-bool EchoCommander::isEscaped(char *currentChar, char escapeChar, char *lastChar) {
+bool EchoCommander::isEscaped(char *currentChar, char escapeChar,
+                              char *lastChar) {
   bool escaped;
 
   escaped = (*lastChar == escapeChar);
   *lastChar = *currentChar;
 
-  if(*lastChar == cmdEscapeChar && escaped) {
+  if (*lastChar == cmdEscapeChar && escaped) {
     *lastChar = '\0';
   }
 
@@ -251,8 +287,9 @@ void EchoCommander::apply(commandCallbackFunction commandFunction) {
   defaultFunction = commandFunction;
 }
 
-void EchoCommander::apply(byte messageId, commandCallbackFunction commandFunction) {
-  if(messageId > 0 && messageId< MAX_CALLBACKS) {
+void EchoCommander::apply(byte messageId,
+                          commandCallbackFunction commandFunction) {
+  if (messageId > 0 && messageId < MAX_CALLBACKS) {
     commandList[messageId] = commandFunction;
   }
 }

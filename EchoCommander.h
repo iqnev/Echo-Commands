@@ -180,7 +180,15 @@ class EchoCommander {
    */
   bool sendMessCommand(byte commandId, bool ACK, byte ackCommandId);
 
+  /**
+   * Send START of command.
+   */
   void sendCommandStart(byte commandId);
+
+  /**
+   * Send ENDT of command.
+   */
+  bool sendCommandStop(bool ACK = false, byte ackCommandId = 1, unsigned int timeout = DEFAULT_TIMEOUT);
 
   /**
    * Reads Serial data in EchoCommander from Arduino Searial interface.
@@ -207,6 +215,11 @@ class EchoCommander {
    * Dispatches attached callbacks.
    */
   inline void dispatcheMessage() __attribute__((always_inline));
+
+  /**
+   * Waits for reply from sender or timeout before continuing.
+   */
+  inline bool blockedToReply(unsigned int timeout = DEFAULT_TIMEOUT, byte ackCommandId = 1) __attribute__((always_inline));
   /**
    * Checks whether a current string is clean.
    */
