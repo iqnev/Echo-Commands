@@ -97,8 +97,11 @@ class EchoCommander {
   // Locks the input streaming of new commands, during sending a command.
   bool locking_sender;
 
-  //The last argument is readed.
+  //The last argument is readded.
   bool lastArgIsReaded;
+
+  //Indicated if last fetched argument could be read.
+  bool lastArgIsOk;
 
   uint8_t currentMessageState;
 
@@ -196,9 +199,9 @@ class EchoCommander {
   void readSerialData();
 
   /*
-   * Reads the next argument.
+   * Reads the next argument as int 16 bits.
    */
-  int16_t readNextArg();
+  int16_t readNextArgAs16();
 
   /*
    * Gets the next argument. If argument is available- return true.
@@ -210,6 +213,11 @@ class EchoCommander {
    */
   inline uint8_t extractMessage(char currentChar)
       __attribute__((always_inline));
+
+  /**
+   * Determines if acknowledge has come in.
+   */
+  inline bool checkForACK(byte ackCommand) __attribute__((always_inline));
 
   /*
    * Dispatches attached callbacks.

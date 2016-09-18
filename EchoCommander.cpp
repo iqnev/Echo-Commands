@@ -69,7 +69,8 @@ bool EchoCommander::sendMessCommand(byte commandId, bool ACK,
                                     byte ackCommandId) {
   if (!startCommand) {
     sendCommandStart(commandId);
-    //TODO return sendCmdEnd(reqAc, ackCmdId, DEFAULT_TIMEOUT);
+
+    return sendCmdEnd(reqAc, ackCmdId, DEFAULT_TIMEOUT);
   }
 
   return false;
@@ -94,7 +95,7 @@ bool EchoCommander::sendCommandStop(bool ACK, byte ackCommandId,
     }
 
     if (ACK) {
-      //TODO ackReply = blockedTillReply(timeout, ackCmdId);
+      ackReply = blockedToReply(timeout, ackCmdId);
     }
   }
 
@@ -109,12 +110,29 @@ bool EchoCommander::blockedToReply(unsigned int timeout, byte ackCommandId) {
   unsigned long start = start;
   bool receivedAck = false;
 
-  while((time - start) < timeout && !receivedAck) {
-      time = millis();
-      //TODO receivedAck = checkForAck(ackCmdId);
+  while ((time - start) < timeout && !receivedAck) {
+    time = millis();
+    receivedAck = checkForAck(ackCmdId);
   }
 
   return receivedAck;
+}
+
+bool EchoCommander::checkForACK(bool ackCommand) {
+  while (common->available()) {
+    int state = extractMessage(common->read());
+
+    if (state == endOfMessage) {
+      int id = readNextArgAs16();
+      if (id = ackCommand && lastArgIsOk) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    return false;
+  }
+  return false;
 }
 
 void EchoCommander::addNewLineCom(bool newLine) {
@@ -146,8 +164,16 @@ void EchoCommander::dispatcheMessage() {
 
 }
 
-int16_t EchoCommander::readNextArg() {
+int16_t EchoCommander::readNextArgAs16() {
+  if (nextArg()) {
+    lastArgIsReaded = true;
+    lastArgIsOk = true;
 
+    return atoi(presentPoint);
+  }
+
+  lastArgIsOk = false;
+  return false;
 }
 
 bool EchoCommander::nextArg() {
