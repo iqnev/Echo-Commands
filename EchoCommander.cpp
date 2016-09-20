@@ -161,7 +161,15 @@ void EchoCommander::readSerialData() {
 }
 
 void EchoCommander::dispatcheMessage() {
+  lastCommandID = readNextArgAs16();
 
+  if(lastCommandID > 0 && lastCommandID < MAX_CALLBACKS && lastArgIsOk && callbackList[lastCommandID] != NULL) {
+    (*callbackList[lastCommandID])();
+  } else {
+    if(defaultFunction != NULL) {
+      (*defaultFunction)();
+    }
+  }
 }
 
 int16_t EchoCommander::readNextArgAs16() {
